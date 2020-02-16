@@ -1,0 +1,85 @@
+Sub VBAStocks()
+'Define number of tabs to be included in the loop
+
+Application.ScreenUpdating = False
+
+Dim yeartab As Worksheet
+For Each yeartab In Worksheets
+
+         
+
+    yeartab.Activate 'activate the  tab
+    'Go to first row
+    Cells.Range("a2").Activate
+    
+    'count tickers
+    tickercounter = 1
+    Cells.Range("I1").Value = "Ticker"
+    Cells.Range("j1").Value = "YearlyChange"
+    Cells.Range("k1").Value = "Percent Change"
+    Cells.Range("l1").Value = "Total Stock Volume"
+    'Start the loop
+    Do While ActiveCell.Value() <> ""
+        ticker = ActiveCell.Value()
+        openvalue = ActiveCell.Offset(0, 2).Value
+        totalvolum = 0
+    
+        Do While ActiveCell.Value() = ticker
+            totalvolum = totalvolum + ActiveCell.Offset(0, 6).Value
+            ActiveCell.Offset(1, 0).Activate
+        Loop
+        
+        tickercounter = tickercounter + 1
+        closevalue = ActiveCell.Offset(-1, 5).Value
+        
+        ActiveCell.Offset(tickercounter - ActiveCell.Row, 8).Value = ticker
+        ActiveCell.Offset(tickercounter - ActiveCell.Row, 9).Value = (closevalue - openvalue)
+        If openvalue <> 0 Then
+            ActiveCell.Offset(tickercounter - ActiveCell.Row, 10).Value = ((closevalue - openvalue) / openvalue)
+        Else
+            ActiveCell.Offset(tickercounter - ActiveCell.Row, 10).Value = 0
+        End If
+        ActiveCell.Offset(tickercounter - ActiveCell.Row, 11).Value = totalvolum
+    
+        totalvolum = 0
+        openvalue = 0
+        closevalue = 0
+    
+    Loop
+    'Conditional format
+    Cells.Range("j2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+        Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlLess, _
+            Formula1:="=0"
+        Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+        With Selection.FormatConditions(1).Font
+            .Color = -16383844
+            .TintAndShade = 0
+        End With
+        With Selection.FormatConditions(1).Interior
+            .PatternColorIndex = xlAutomatic
+            .Color = 13551615
+            .TintAndShade = 0
+        End With
+     Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlGreater, _
+            Formula1:="=0"
+        Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+        With Selection.FormatConditions(1).Font
+            .Color = -16752384
+            .TintAndShade = 0
+        End With
+        With Selection.FormatConditions(1).Interior
+            .PatternColorIndex = xlAutomatic
+            .Color = 13561798
+            .TintAndShade = 0
+        End With
+        Selection.FormatConditions(1).StopIfTrue = False
+
+
+Next
+
+
+Application.ScreenUpdating = True
+
+
+End Sub
